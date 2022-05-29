@@ -1,11 +1,14 @@
 services:
   db:
     image: mysql
+    ports:
+      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DB_NAME}
       MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PASSWORD: abc123
+    restart: on-failure
 
   api:
     build: .
