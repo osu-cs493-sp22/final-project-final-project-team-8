@@ -1,6 +1,7 @@
 const express = require('express')
 
 const api = require('./api')
+const sequelize = require('./lib/sequelize')
 
 const queue = 'photos'
 
@@ -30,6 +31,8 @@ app.use('*', function (req, res, next) {
   })
 })
 
-app.listen(port, function () {
-    console.log("== Server is running on port", port)
+sequelize.sync().then(function() {
+  app.listen(port, function () {
+      console.log("== Server is running on port", port)
+  })
 })
