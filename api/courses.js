@@ -52,7 +52,7 @@ router.get('/', async function (req, res) {
       })
 })
 
-router.post('/', async function (req, res) {
+router.post('/', async function (req, res, next) {
     if (req.body.instructorId) {
         try {
             const user = await User.findOne({ where: { id: req.body.instructorId }})
@@ -78,6 +78,82 @@ router.post('/', async function (req, res) {
         res.status(400).send({ error: "Must include instructorId" })
     }
     
+})
+
+router.get('/:id', async function (req, res, next) {
+    try {
+        const course = await Course.findOne({ where: { id: req.params.id } })
+        if (course) {
+            res.status(200).send(course)
+        }
+        else {
+            next()
+        }
+    }
+    catch(e) {
+        console.log(e)
+        res.status(500).send({
+            error: `Unable to fetch course with id: ${req.params.id}`
+        })
+    }
+    
+})
+
+//requires teacher or admin auth
+router.patch('/:id', async function (req, res) {
+    const id = req.params.id
+    const course = Course.findOne({ where: { id: id } })
+    if (!course)
+        res.status(404).send({error: "Specified Course `id` not found"})
+    else {
+        const result = await Course.update(req.body, {
+            where: { id: id },
+            fields: CourseClientFields
+        })
+        if (result[0] > 0)
+            res.status(204).send()
+        else {
+            res.status(400).send({ error: "The request body was either not present or did not contain any fields related to Course objects."})
+        }
+    }
+})
+
+//requires admin auth
+router.delete('/:id', async function (req, res, next) {
+    const id = req.params.id
+    const course = Course.findOne({ where: { id: id } })
+    if (!course)
+        res.status(404).send({error: "Specified Course `id` not found"})
+    else {
+        try {
+            await Course.destroy({ where: { id: id } })
+            res.status(204).send()
+        }
+        catch(e) {
+            next(e)
+        }
+    }
+})
+
+//requires teacher or admin auth
+// -- currently not working
+router.get('/:id/students', async function (req, res, next) {
+    const id = req.params.id
+    const course = Course.findByPk(id, {
+        include: [
+            {
+                model: User,
+                where: {
+                    role: "student"
+                }
+            }
+        ]
+    })
+    if (!course)
+        res.status(404).send({error: "Specified Course `id` not found"})
+    else {
+        res.status(200).send({course: course})
+    }
 })
 
 
