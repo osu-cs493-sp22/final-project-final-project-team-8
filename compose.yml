@@ -1,14 +1,23 @@
 services:
   db:
     image: mysql
-    ports:
-      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DB_NAME}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: abc123
+
+  db-init:
+    build: .
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DB_NAME: ${MYSQL_DB_NAME}
+    depends_on:
+      - db
     restart: on-failure
+    command: npm run initdb
 
   api:
     build: .

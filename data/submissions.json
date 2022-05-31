@@ -1,0 +1,29 @@
+[
+    {
+        "file": "submission.jpg",
+        "comment": "hope this works",
+        "text": "This is my assignment",
+        "timestamp": "2022-02-29",
+        "grade": 92.4,
+        "assignmentId": 1,
+        "userId": 1
+    },
+    {
+        "file": "project.jpg",
+        "comment": "please give me a good grade",
+        "text": "This is my assignment hope you like it",
+        "timestamp": "2022-02-27",
+        "grade": 82.9,
+        "assignmentId": 2,
+        "userId": 2
+    },
+    {
+        "file": "quiz.jpg",
+        "comment": "that was hard",
+        "text": "can you round up?",
+        "timestamp": "2022-02-26",
+        "grade": 91.0,
+        "assignmentId": 1,
+        "userId": 3
+    }
+]

@@ -11,7 +11,13 @@ const Assignment = sequelize.define('assignment', {
     courseId: { type: DataTypes.INTEGER, allowNull: false }
 })
 
-Assignment.hasMany(Submission, { foreignKey: 'assignmentId', onDelete: 'CASCADE' });
-Submission.belongsTo(Assignment);
+// Assignment.hasMany(Submission, { foreignKey: { allowNull: false }});
+// Submission.belongsTo(Assignment);
 
 exports.Assignment = Assignment
+
+exports.AssignmentClientFields = [
+    'title',
+    'dueDate',
+    'courseId'
+  ]

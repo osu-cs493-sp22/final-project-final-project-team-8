@@ -1,0 +1,26 @@
+[
+    {
+        "subject": "MTH",
+        "number": "254",
+        "term": "Spring",
+        "title": "Vector Calculus",
+        "description": "triple integrals baby",
+        "instructorId": 1
+    },
+    {
+        "subject": "CS",
+        "number": "493",
+        "term": "Spring",
+        "title": "Cloud Application Development",
+        "description": "APIs galore",
+        "instructorId": 2
+    },
+    {
+        "subject": "COMM",
+        "number": "111",
+        "term": "Fall",
+        "title": "Public Speaking",
+        "description": "gonna teach you how to speak",
+        "instructorId": 3
+    }
+]

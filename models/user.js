@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize')
+const bcrypt = require('bcryptjs')
 
 const sequelize = require('../lib/sequelize')
 
@@ -26,10 +27,16 @@ const User = sequelize.define('user', {
                 msg: "Invalid role. Must be student, instructor, or admin"
             }
         }
+    },
+    password: { 
+        type: DataTypes.STRING, allowNull: false, 
+        set (value) {
+            this.setDataValue('password', bcrypt.hashSync(value, 8));
+        }
     }
 })
 
-User.hasMany(Submission, { foreignKey: "userId" })
+User.hasMany(Submission, { foreignKey: "userId", onDelete: "CASCADE" })
 Submission.belongsTo(User)
 
 exports.User = User
@@ -38,5 +45,6 @@ exports.UserClientFields = [
     'firstName',
     'lastName',
     'email',
-    'role'
+    'role',
+    'password'
 ]

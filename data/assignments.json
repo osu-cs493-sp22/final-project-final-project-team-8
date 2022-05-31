@@ -1,0 +1,17 @@
+[
+    {
+        "title": "Syllabus Quiz",
+        "dueDate": "2022-03-22",
+        "courseId": 1
+    },
+    {
+        "title": "Coding Assignment 1",
+        "dueDate": "2022-03-24",
+        "courseId": 2
+    },
+    {
+        "title": "Relativity Quiz",
+        "dueDate": "2022-03-28",
+        "courseId": 1
+    }
+]
