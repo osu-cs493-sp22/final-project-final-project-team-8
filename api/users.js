@@ -15,19 +15,25 @@ router.post('/', async function (req, res) {
             const authHeader = req.get('authorization') || ''
             const authHeaderParts = authHeader.split(' ')
             const token = authHeaderParts[0] == 'Bearer' ? authHeaderParts[1] : null
-            var payload
+            var payload = null
             try {
                 payload = jwt.verify(token, secret)
             } catch (err) {
-                res.status(401).send({
+                res.status(403).send({
                     err: "Invalid Authentication Token"
                 })
             }
-            const user = await User.findAll({ where: { id: payload.sub } })
-            if (user[0].role != "admin") {
-                res.status(401).send({
-                    err: "Admin permissions required to create new admin or instructor"
-                })
+            if (payload) {
+                const user = await User.findAll({ where: { id: payload.sub } })
+                if (user[0].role != "admin") {
+                    res.status(403).send({
+                        err: "Admin permissions required to create new admin or instructor"
+                    })
+                }
+                else {
+                    const user = await User.create(userToInsert, UserClientFields)
+                    res.status(201).send({ id: user.id })
+                }
             }
         }
         else {
