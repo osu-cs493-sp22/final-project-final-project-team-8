@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "9a2734dc-2642-4395-b057-288cf2627af6",
+		"name": "CS-493-Final-Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "courses/:id",
+					"item": [
+						{
+							"name": "GET",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PATCH",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Algebra\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DELETE",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET Students",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}/students",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}",
+										"students"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GET courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST course",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subject\": \"Math\",\n    \"number\": \"42017\",\n    \"term\": \"SP\",\n    \"title\": \"Algebra 1\",\n    \"description\": \"An introductory course to the fundamentals of algebraic math\",\n    \"instructorId\": \"1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "POST User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Matthew\",\n    \"lastName\": \"Hotchkiss\",\n    \"email\": \"hotchkma2@oregonstate.edu\",\n    \"role\": \"instructor\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
