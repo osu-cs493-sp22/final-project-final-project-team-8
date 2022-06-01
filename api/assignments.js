@@ -4,6 +4,7 @@ const router = Router()
 const { Assignment, AssignmentClientFields } = require('../models/assignment')
 const { Submission, SubmissionClientFields } = require('../models/submission')
 
+//must be authenticated as the course's teacher or an admin
 router.post('/', async function (req, res) {
     try {
         const assignment = await Assignment.create(req.body)
@@ -14,6 +15,7 @@ router.post('/', async function (req, res) {
     }
 })
 
+//any user
 router.get('/:id', async function (req, res){
     const assignment = await Assignment.findByPk(req.params.id)
     if (assignment)
@@ -23,6 +25,7 @@ router.get('/:id', async function (req, res){
     }
 })
 
+//must be authenticated as the course's teacher or an admin
 router.patch('/:id', async function(req, res){
     const id = req.params.id
     const assignment = await Assignment.findByPk(id)
@@ -44,6 +47,7 @@ router.patch('/:id', async function(req, res){
     }
 })
 
+//must be authenticated as the course's teacher or an admin
 router.delete('/:id', async function(req, res) {
     const id = req.params.id
     const assignment = await Assignment.findOne({ where: { id: id } })
@@ -60,6 +64,7 @@ router.delete('/:id', async function(req, res) {
     }
 })
 
+//must be authenticated as the course's teacher or an admin
 router.get('/:id/submissions', async function(req, res) {
     const id = req.params.id
     const assignment = await Assignment.findOne({ where: { id: id } })
