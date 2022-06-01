@@ -139,20 +139,25 @@ router.delete('/:id', async function (req, res, next) {
 // -- currently not working
 router.get('/:id/students', async function (req, res, next) {
     const id = req.params.id
-    const course = Course.findByPk(id, {
+    const course = await Course.findByPk(id, {
         include: [
             {
                 model: User,
+                through: {attributes: []},
                 where: {
                     role: "student"
+                },
+                attributes: {
+                    exclude: ["password"]
                 }
             }
         ]
     })
+    const students = course.users
     if (!course)
         res.status(404).send({error: "Specified Course `id` not found"})
     else {
-        res.status(200).send({course: course})
+        res.status(200).send({students: students})
     }
 })
 
