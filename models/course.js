@@ -5,6 +5,7 @@ const sequelize = require('../lib/sequelize')
 const { Assignment } = require('./assignment')
 const { User } = require('./user')
 const { Submission } = require('./submission')
+const { Enrollment } = require('./enrollment')
 
 const Course = sequelize.define('course', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -24,8 +25,8 @@ const Course = sequelize.define('course', {
     description: { type: DataTypes.STRING, allowNull: false },
 })
 
-Course.belongsToMany(User, { through: 'enrollments' })
-User.belongsToMany(Course, { through: 'enrollments' })
+Course.belongsToMany(User, { through: Enrollment })
+User.belongsToMany(Course, { through: Enrollment })
 
 User.hasOne(Course, { foreignKey: 'instructorId', allowNull: false })
 

@@ -5,7 +5,7 @@
         "term": "Spring",
         "title": "Vector Calculus",
         "description": "triple integrals baby",
-        "instructorId": 1
+        "instructorId": 2
     },
     {
         "subject": "CS",
@@ -21,6 +21,6 @@
         "term": "Fall",
         "title": "Public Speaking",
         "description": "gonna teach you how to speak",
-        "instructorId": 3
+        "instructorId": 2
     }
 ]

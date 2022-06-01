@@ -15,7 +15,7 @@
         "timestamp": "2022-02-27",
         "grade": 82.9,
         "assignmentId": 2,
-        "userId": 2
+        "userId": 1
     },
     {
         "file": "quiz.jpg",
@@ -24,6 +24,6 @@
         "timestamp": "2022-02-26",
         "grade": 91.0,
         "assignmentId": 1,
-        "userId": 3
+        "userId": 4
     }
 ]

@@ -1,23 +1,30 @@
 [
-    {
-        "firstName": "Nick", 
-        "lastName": "Arzner",
-        "email": "nick@block15.com",
-        "password": "hunter2",
-        "role": "student"
-      },
-      {
-        "firstName": "Tori", 
-        "lastName": "Lockwood",
-        "email": "tori@osu.edu",
-        "password": "hunter2",
-        "role": "instructor"
-      },
-      {
-        "firstName": "Mitchell", 
-        "lastName": "Stewart",
-        "email": "yolo@gmail.com",
-        "password": "hunter2",
-        "role": "admin"
-      }
+  {
+    "firstName": "Nick",
+    "lastName": "Arzner",
+    "email": "nick@block15.com",
+    "password": "hunter2",
+    "role": "student"
+  },
+  {
+    "firstName": "Tori",
+    "lastName": "Lockwood",
+    "email": "tori@osu.edu",
+    "password": "hunter2",
+    "role": "instructor"
+  },
+  {
+    "firstName": "Mitchell",
+    "lastName": "Stewart",
+    "email": "yolo@gmail.com",
+    "password": "hunter2",
+    "role": "admin"
+  },
+  {
+    "firstName": "Nick",
+    "lastName": "Rezner",
+    "email": "nick@block14.com",
+    "password": "hunter2",
+    "role": "student"
+  }
 ]
