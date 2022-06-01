@@ -3,8 +3,6 @@ const bcrypt = require('bcryptjs')
 
 const sequelize = require('../lib/sequelize')
 
-const { Submission } = require('./submission')
-
 const User = sequelize.define('user', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     firstName: { type: DataTypes.STRING, allowNull: false },
@@ -35,9 +33,6 @@ const User = sequelize.define('user', {
         }
     }
 })
-
-User.hasMany(Submission, { foreignKey: "userId", onDelete: "CASCADE" })
-Submission.belongsTo(User)
 
 exports.User = User
 

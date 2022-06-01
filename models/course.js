@@ -4,6 +4,7 @@ const sequelize = require('../lib/sequelize')
 
 const { Assignment } = require('./assignment')
 const { User } = require('./user')
+const { Submission } = require('./submission')
 
 const Course = sequelize.define('course', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -30,6 +31,12 @@ User.hasOne(Course, { foreignKey: 'instructorId', allowNull: false })
 
 Course.hasMany(Assignment, { foreignKey: 'courseId', allowNull: false })
 Assignment.belongsTo(Course)
+
+Assignment.hasMany(Submission, { foreignKey: "assignmentId", allowNull: false } );
+Submission.belongsTo(Assignment);
+
+User.hasMany(Submission, { foreignKey: "userId", onDelete: "CASCADE" })
+Submission.belongsTo(User)
 
 exports.Course = Course
 
