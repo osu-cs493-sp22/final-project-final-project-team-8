@@ -1,7 +1,6 @@
-const { countReset } = require('console')
-const express = require('express')
 const { Router } = require('express')
 const router = Router()
+const { generateAuthToken, requireAuthentication, requireTeacherOrAdminAuth } = require('../lib/auth')
 
 const { ValidationError } = require('sequelize')
 
@@ -55,32 +54,37 @@ router.get('/', async function (req, res) {
 })
 
 //only an admin can create a course
-router.post('/', async function (req, res, next) {
-    if (req.body.instructorId) {
-        try {
-            const user = await User.findOne({ where: { id: req.body.instructorId }})
-            if (user && user.role == "instructor") {
-                const course = await Course.create(req.body, CourseClientFields)
-                res.status(201).send({ id: course.id })
+router.post('/', requireAuthentication, async function (req, res, next) {
+    const user = await User.findByPk(req.user)
+    if (user.role == "admin") {
+        if (req.body.instructorId) {
+            try {
+                const user = await User.findOne({ where: { id: req.body.instructorId }})
+                if (user && user.role == "instructor") {
+                    const course = await Course.create(req.body, CourseClientFields)
+                    res.status(201).send({ id: course.id })
+                }
+                else {
+                    throw new ValidationError(`Instructor with id ${req.body.instructorId} does not exist`)
+                }
             }
-            else {
-                throw new ValidationError(`Instructor with id ${req.body.instructorId} does not exist`)
+            catch (e) {
+                if (e instanceof ValidationError) {
+                    res.status(400).send({ error: e.message })
+                }
+                else {
+                    console.log(e)
+                    next(e)
+                }
             }
         }
-        catch (e) {
-            if (e instanceof ValidationError) {
-                res.status(400).send({ error: e.message })
-            }
-            else {
-                console.log(e)
-                next(e)
-            }
+        else {
+            res.status(400).send({ error: "Must include instructorId" })
         }
     }
     else {
-        res.status(400).send({ error: "Must include instructorId" })
+        res.send(403).send({ error: "Only an authenticated User with 'admin' role can create a new Course" })
     }
-    
 })
 
 router.get('/:id', async function (req, res, next) {
@@ -103,7 +107,7 @@ router.get('/:id', async function (req, res, next) {
 })
 
 //requires course instructor or any admin auth
-router.patch('/:id', async function (req, res) {
+router.patch('/:id', requireTeacherOrAdminAuth, async function (req, res) {
     const id = req.params.id
     const course = Course.findOne({ where: { id: id } })
     if (!course)
@@ -122,24 +126,30 @@ router.patch('/:id', async function (req, res) {
 })
 
 //requires admin auth
-router.delete('/:id', async function (req, res, next) {
-    const id = req.params.id
-    const course = await Course.findOne({ where: { id: id } })
-    if (!course)
-        res.status(404).send({error: "Specified Course `id` not found"})
+router.delete('/:id', requireAuthentication, async function (req, res, next) {
+    const user = await User.findByPk(req.user)
+    if (user.role == "admin") {
+        const id = req.params.id
+        const course = await Course.findOne({ where: { id: id } })
+        if (!course)
+            res.status(404).send({error: "Specified Course `id` not found"})
+        else {
+            try {
+                await Course.destroy({ where: { id: id } })
+                res.status(204).send()
+            }
+            catch(e) {
+                next(e)
+            }
+        }
+    }
     else {
-        try {
-            await Course.destroy({ where: { id: id } })
-            res.status(204).send()
-        }
-        catch(e) {
-            next(e)
-        }
+        res.status(403).send({ error: "Only an authenticated User with 'admin' role can delete a Course" })
     }
 })
 
 //requires course instructor or any admin auth
-router.get('/:id/students', async function (req, res) {
+router.get('/:id/students', requireTeacherOrAdminAuth, async function (req, res) {
     const id = req.params.id
     const course = await Course.findByPk(id, {
         include: [
@@ -164,7 +174,7 @@ router.get('/:id/students', async function (req, res) {
 })
 
 //requires course instructor or any admin auth
-router.post('/:id/students', async function (req, res) {
+router.post('/:id/students', requireTeacherOrAdminAuth, async function (req, res) {
     if (req.body.students) {
         const id = req.params.id
         const course = await Course.findByPk(id)
@@ -193,7 +203,7 @@ router.post('/:id/students', async function (req, res) {
 })
 
 //requires course instructor or any admin auth
-router.get('/:id/roster', async function (req, res) {
+router.get('/:id/roster', requireTeacherOrAdminAuth, async function (req, res) {
     const id = req.params.id
     const course = await Course.findByPk(id)
     if (!course)
