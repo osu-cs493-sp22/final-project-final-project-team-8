@@ -124,7 +124,7 @@ router.patch('/:id', async function (req, res) {
 //requires admin auth
 router.delete('/:id', async function (req, res, next) {
     const id = req.params.id
-    const course = Course.findOne({ where: { id: id } })
+    const course = await Course.findOne({ where: { id: id } })
     if (!course)
         res.status(404).send({error: "Specified Course `id` not found"})
     else {

@@ -92,6 +92,72 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "POST students",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"students\": [1]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}/students",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}",
+										"students"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET roster",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}/roster",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}",
+										"roster"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET assignments",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{courseId}}/assignments",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{courseId}}",
+										"assignments"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -164,6 +230,152 @@
 							],
 							"path": [
 								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assignments",
+			"item": [
+				{
+					"name": "assignments/:id",
+					"item": [
+						{
+							"name": "GET assignment",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/assignments/{{assignmentId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"assignments",
+										"{{assignmentId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PATCH assignment",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Test 2\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/assignments/{{assignmentId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"assignments",
+										"{{assignmentId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DELETE assignment",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/assignments/{{assignmentId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"assignments",
+										"{{assignmentId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET submissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/assignments/{{assignmentId}}/submissions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"assignments",
+										"{{assignmentId}}",
+										"submissions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST submission",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"file\": \"example\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/assignments/{{assignmentId}}/submissions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"assignments",
+										"{{assignmentId}}",
+										"submissions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "POST assignment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test 1\",\n    \"dueDate\": \"2022-07-1\",\n    \"courseId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/assignments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"assignments"
 							]
 						}
 					},

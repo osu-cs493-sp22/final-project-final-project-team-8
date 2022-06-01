@@ -7,7 +7,6 @@ const Submission = sequelize.define('submission', {
     file: { type: DataTypes.STRING, allowNull: false},
     comment: { type: DataTypes.STRING },
     text: { type: DataTypes.STRING },
-    timestamp: { type: DataTypes.DATE, allowNull: false },
     grade: { type: DataTypes.DOUBLE }
 })
 
@@ -17,7 +16,6 @@ exports.SubmissionClientFields = [
     'file',
     'comment',
     'text',
-    'timestamp',
     'grade',
     'assignmentId',
     'userId'
