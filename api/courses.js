@@ -6,6 +6,7 @@ const router = Router()
 const { ValidationError } = require('sequelize')
 
 const { Course, CourseClientFields } = require('../models/course')
+const { Enrollment, EnrollmentClientFields } = require('../models/enrollment')
 const { User } = require('../models/user')
 
 router.get('/', async function (req, res) {
@@ -137,7 +138,7 @@ router.delete('/:id', async function (req, res, next) {
 
 //requires teacher or admin auth
 // -- currently not working
-router.get('/:id/students', async function (req, res, next) {
+router.get('/:id/students', async function (req, res) {
     const id = req.params.id
     const course = await Course.findByPk(id, {
         include: [
@@ -158,6 +159,34 @@ router.get('/:id/students', async function (req, res, next) {
         res.status(404).send({error: "Specified Course `id` not found"})
     else {
         res.status(200).send({students: students})
+    }
+})
+
+router.post('/:id/students', async function (req, res, next) {
+    if (req.body.students) {
+        const id = req.params.id
+        const course = await Course.findByPk(id)
+        if (!course)
+            res.status(404).send({error: "Specified Course `id` not found"})
+        else {
+            try {
+                await Enrollment.destroy({ where: { courseId: id } })
+                req.body.students.forEach(async (student) => {
+                    const enroll = {
+                        userId: student,
+                        courseId: id
+                    }
+                    await Enrollment.create(enroll, EnrollmentClientFields)
+                })
+                res.status(200).send()
+            }
+            catch {
+                res.status(500).send("Something went wrong. Please try again later")
+            }
+        }
+    }
+    else {
+        res.status(400).send("The request body was either not present or did not contain the fields described above.")
     }
 })
 
