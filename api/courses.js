@@ -8,6 +8,7 @@ const { ValidationError } = require('sequelize')
 const { Course, CourseClientFields } = require('../models/course')
 const { Enrollment, EnrollmentClientFields } = require('../models/enrollment')
 const { User } = require('../models/user')
+const { Assignment } = require('../models/assignment')
 
 router.get('/', async function (req, res) {
     let page = parseInt(req.query.page) || 1
@@ -53,6 +54,7 @@ router.get('/', async function (req, res) {
       })
 })
 
+//only an admin can create a course
 router.post('/', async function (req, res, next) {
     if (req.body.instructorId) {
         try {
@@ -100,7 +102,7 @@ router.get('/:id', async function (req, res, next) {
     
 })
 
-//requires teacher or admin auth
+//requires course instructor or any admin auth
 router.patch('/:id', async function (req, res) {
     const id = req.params.id
     const course = Course.findOne({ where: { id: id } })
@@ -136,8 +138,7 @@ router.delete('/:id', async function (req, res, next) {
     }
 })
 
-//requires teacher or admin auth
-// -- currently not working
+//requires course instructor or any admin auth
 router.get('/:id/students', async function (req, res) {
     const id = req.params.id
     const course = await Course.findByPk(id, {
@@ -162,15 +163,16 @@ router.get('/:id/students', async function (req, res) {
     }
 })
 
-router.post('/:id/students', async function (req, res, next) {
+//requires course instructor or any admin auth
+router.post('/:id/students', async function (req, res) {
     if (req.body.students) {
         const id = req.params.id
         const course = await Course.findByPk(id)
         if (!course)
             res.status(404).send({error: "Specified Course `id` not found"})
         else {
+            await Enrollment.destroy({ where: { courseId: id } })
             try {
-                await Enrollment.destroy({ where: { courseId: id } })
                 req.body.students.forEach(async (student) => {
                     const enroll = {
                         userId: student,
@@ -180,13 +182,36 @@ router.post('/:id/students', async function (req, res, next) {
                 })
                 res.status(200).send()
             }
-            catch {
-                res.status(500).send("Something went wrong. Please try again later")
+            catch(e) {
+                res.status(400).send({error: e})
             }
         }
     }
     else {
         res.status(400).send("The request body was either not present or did not contain the fields described above.")
+    }
+})
+
+//requires course instructor or any admin auth
+router.get('/:id/roster', async function (req, res) {
+    const id = req.params.id
+    const course = await Course.findByPk(id)
+    if (!course)
+        res.status(404).send({error: "Specified Course `id` not found"})
+    else {
+        res.status(200).send("This endpoint has not been finished yet")
+    }
+})
+
+//no auth required
+router.get('/:id/assignments', async function (req, res) {
+    const id = req.params.id
+    const course = await Course.findByPk(id)
+    if (!course)
+        res.status(404).send({error: "Specified Course `id` not found"})
+    else {
+        const assignments = await Assignment.findAll({ where: { courseId: id }, attributes: { exclude: ["courseId"] } })
+        res.status(200).send({assignments: assignments})
     }
 })
 
