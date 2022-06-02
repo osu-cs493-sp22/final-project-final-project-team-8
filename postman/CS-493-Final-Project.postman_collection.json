@@ -210,7 +210,7 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "POST User",
+					"name": "POST user",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -230,6 +230,51 @@
 							],
 							"path": [
 								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST login user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tori@osu.edu\",\n    \"password\": \"hunter2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
 							]
 						}
 					},
@@ -362,7 +407,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Test 1\",\n    \"dueDate\": \"2022-07-1\",\n    \"courseId\": 1\n}",
+							"raw": "{\n    \"title\": \"Test 1\",\n    \"dueDate\": \"2022-07-1\",\n    \"courseId\": {{courseId}}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -382,6 +427,36 @@
 					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImlhdCI6MTY1NDEyOTQ3NiwiZXhwIjoxNjU0MjE1ODc2fQ.LK-h7ENdqZoJ5Zo-xmU9lVVHiQ1N6L44GtpXlQAzWFM",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

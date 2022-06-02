@@ -107,20 +107,27 @@ router.get('/:id', async function (req, res, next) {
 })
 
 //requires course instructor or any admin auth
-router.patch('/:id', requireTeacherOrAdminAuth, async function (req, res) {
+router.patch('/:id', requireAuthentication, async function (req, res) {
     const id = req.params.id
-    const course = Course.findOne({ where: { id: id } })
-    if (!course)
+    const course = await Course.findOne({ where: { id: id } })
+    if (!course) {
         res.status(404).send({error: "Specified Course `id` not found"})
-    else {
-        const result = await Course.update(req.body, {
-            where: { id: id },
-            fields: CourseClientFields
-        })
-        if (result[0] > 0)
-            res.status(204).send()
-        else {
-            res.status(400).send({ error: "The request body was either not present or did not contain any fields related to Course objects."})
+    } else {
+        const auth = await requireTeacherOrAdminAuth(req.user, course)
+        switch (auth) {
+            case 403:
+                res.status(403).send({ error: "The request was not made by the teacher of the course or an admin"})
+                break
+            default:
+                const result = await Course.update(req.body, {
+                    where: { id: id },
+                    fields: CourseClientFields
+                })
+                if (result[0] > 0)
+                    res.status(204).send()
+                else {
+                    res.status(400).send({ error: "The request body was either not present or did not contain any fields related to Course objects."})
+                }
         }
     }
 })
@@ -149,7 +156,7 @@ router.delete('/:id', requireAuthentication, async function (req, res, next) {
 })
 
 //requires course instructor or any admin auth
-router.get('/:id/students', requireTeacherOrAdminAuth, async function (req, res) {
+router.get('/:id/students', requireAuthentication, async function (req, res) {
     const id = req.params.id
     const course = await Course.findByPk(id, {
         include: [
@@ -169,31 +176,45 @@ router.get('/:id/students', requireTeacherOrAdminAuth, async function (req, res)
     if (!course)
         res.status(404).send({error: "Specified Course `id` not found"})
     else {
-        res.status(200).send({students: students})
+        const auth = await requireTeacherOrAdminAuth(req.user, course)
+        switch (auth) {
+            case 403:
+                res.status(403).send({ error: "The request was not made by the teacher of the course or an admin"})
+                break
+            default:
+                res.status(200).send({students: students})
+        }
     }
 })
 
 //requires course instructor or any admin auth
-router.post('/:id/students', requireTeacherOrAdminAuth, async function (req, res) {
+router.post('/:id/students', requireAuthentication, async function (req, res) {
     if (req.body.students) {
         const id = req.params.id
         const course = await Course.findByPk(id)
         if (!course)
             res.status(404).send({error: "Specified Course `id` not found"})
         else {
-            await Enrollment.destroy({ where: { courseId: id } })
-            try {
-                req.body.students.forEach(async (student) => {
-                    const enroll = {
-                        userId: student,
-                        courseId: id
+            const auth = await requireTeacherOrAdminAuth(req.user, course)
+            switch (auth) {
+                case 403:
+                    res.status(403).send({ error: "The request was not made by the teacher of the course or an admin"})
+                    break
+                default:
+                    await Enrollment.destroy({ where: { courseId: id } })
+                    try {
+                        req.body.students.forEach(async (student) => {
+                            const enroll = {
+                                userId: student,
+                                courseId: id
+                            }
+                            await Enrollment.create(enroll, EnrollmentClientFields)
+                        })
+                        res.status(200).send()
                     }
-                    await Enrollment.create(enroll, EnrollmentClientFields)
-                })
-                res.status(200).send()
-            }
-            catch(e) {
-                res.status(400).send({error: e})
+                    catch(e) {
+                        res.status(400).send({error: e})
+                    }
             }
         }
     }
@@ -203,13 +224,20 @@ router.post('/:id/students', requireTeacherOrAdminAuth, async function (req, res
 })
 
 //requires course instructor or any admin auth
-router.get('/:id/roster', requireTeacherOrAdminAuth, async function (req, res) {
+router.get('/:id/roster', requireAuthentication, async function (req, res) {
     const id = req.params.id
     const course = await Course.findByPk(id)
     if (!course)
         res.status(404).send({error: "Specified Course `id` not found"})
     else {
-        res.status(200).send("This endpoint has not been finished yet")
+        const auth = await requireTeacherOrAdminAuth(req.user, course)
+        switch (auth) {
+            case 403:
+                res.status(403).send({ error: "The request was not made by the teacher of the course or an admin"})
+                break
+            default:
+                res.status(200).send("This endpoint has not been finished yet")
+        }
     }
 })
 
