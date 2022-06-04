@@ -96,8 +96,8 @@ router.get('/:id', requireAuthentication, async function (req, res) {
     if (req.user == req.params.id || adminCheck) {
         var user = await User.findByPk(req.params.id, { attributes: { exclude: ["password"] }})
         if (user && user.role == "instructor") {
-            const courses = Course.findAll({ attributes: ['id'], where: { instructorId: req.params.id } })
-            user.courses = courses
+            const courses = await Course.findAll({ raw: true, where: { instructorId: req.params.id } })
+            user.dataValues.courses = courses
         }
         else if (user && user.role == "student") {
             user = await User.findByPk(user.id, {

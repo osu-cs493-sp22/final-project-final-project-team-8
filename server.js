@@ -2,11 +2,12 @@ const express = require('express')
 
 const api = require('./api')
 const sequelize = require('./lib/sequelize')
-
-const queue = 'photos'
+const { connectToDb } = require('./lib/mongo')
+const { connectToRabbitMQ, getChannel } = require('./lib/rabbitmq')
 
 const app = express()
 const port = process.env.PORT || 8000
+const queue = 'rosters'
 
 app.use(express.json())
 app.use(express.static('public'))
@@ -32,7 +33,10 @@ app.use('*', function (req, res, next) {
 })
 
 sequelize.sync().then(function() {
-  app.listen(port, function () {
+  connectToDb(async () => {
+    await connectToRabbitMQ(queue)
+    app.listen(port, function () {
       console.log("== Server is running on port", port)
+    })
   })
 })

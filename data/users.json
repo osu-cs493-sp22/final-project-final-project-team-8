@@ -26,5 +26,12 @@
     "email": "nick@block14.com",
     "password": "hunter2",
     "role": "student"
+  },
+  {
+    "firstName": "Matt",
+    "lastName": "Mayock",
+    "email": "mattm@yay.com",
+    "password": "hunter2",
+    "role": "student"
   }
 ]

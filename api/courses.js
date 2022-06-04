@@ -1,6 +1,10 @@
 const { Router } = require('express')
 const router = Router()
 const { generateAuthToken, requireAuthentication, requireTeacherOrAdminAuth } = require('../lib/auth')
+const { ObjectId, GridFSBucket } = require('mongodb')
+const { connectToRabbitMQ, getChannel } = require('../lib/rabbitmq')
+const amqp = require('amqplib')
+const queue = 'rosters'
 
 const { ValidationError } = require('sequelize')
 
@@ -8,6 +12,7 @@ const { Course, CourseClientFields } = require('../models/course')
 const { Enrollment, EnrollmentClientFields } = require('../models/enrollment')
 const { User } = require('../models/user')
 const { Assignment } = require('../models/assignment')
+const { getDbReference } = require('../lib/mongo')
 
 router.get('/', async function (req, res) {
     let page = parseInt(req.query.page) || 1
@@ -189,7 +194,7 @@ router.get('/:id/students', requireAuthentication, async function (req, res) {
 
 //requires course instructor or any admin auth
 router.post('/:id/students', requireAuthentication, async function (req, res) {
-    if (req.body.students) {
+    if (req.body.enroll || req.body.unenroll) {
         const id = req.params.id
         const course = await Course.findByPk(id)
         if (!course)
@@ -201,15 +206,19 @@ router.post('/:id/students', requireAuthentication, async function (req, res) {
                     res.status(403).send({ error: "The request was not made by the teacher of the course or an admin"})
                     break
                 default:
-                    await Enrollment.destroy({ where: { courseId: id } })
+                    req.body.unenroll.forEach(async (student) => {
+                        await Enrollment.destroy({ where: { courseId: id, userId: student } })
+                    })
                     try {
-                        req.body.students.forEach(async (student) => {
+                        req.body.enroll.forEach(async (student) => {
                             const enroll = {
                                 userId: student,
                                 courseId: id
                             }
                             await Enrollment.create(enroll, EnrollmentClientFields)
                         })
+                        const channel = getChannel()
+                        channel.sendToQueue(queue, Buffer.from(id.toString()))
                         res.status(200).send()
                     }
                     catch(e) {
@@ -222,6 +231,29 @@ router.post('/:id/students', requireAuthentication, async function (req, res) {
         res.status(400).send("The request body was either not present or did not contain the fields described above.")
     }
 })
+
+async function getRosterInfoByCourseId(id) {
+    const db = getDbReference()
+    const bucket = new GridFSBucket(db, { bucketName: 'rosters' })
+    const result = await bucket.find({}).toArray()
+    var rosterId
+    result.forEach(roster => {
+        if (roster.metadata.courseId == id) {
+            rosterId = roster._id.toString()
+        }
+    });
+    return rosterId
+}
+
+function getRosterDownloadStream(id) {
+    const db = getDbReference()
+    const bucket = new GridFSBucket(db, { bucketName: 'rosters' })
+    if (!ObjectId.isValid(id)) {
+        return null
+    } else {
+        return bucket.openDownloadStream(new ObjectId(id))
+    }
+}
 
 //requires course instructor or any admin auth
 router.get('/:id/roster', requireAuthentication, async function (req, res) {
@@ -236,7 +268,25 @@ router.get('/:id/roster', requireAuthentication, async function (req, res) {
                 res.status(403).send({ error: "The request was not made by the teacher of the course or an admin"})
                 break
             default:
-                res.status(200).send("This endpoint has not been finished yet")
+                const rosterId = await getRosterInfoByCourseId(id)
+                if (rosterId) {
+                    getRosterDownloadStream(rosterId)
+                    .on('file', function (file) {
+                        res.status(200).type('csv')
+                    })
+                    .on('error', function(err) {
+                        if (err.code == 'ENOENT') {
+                            next()
+                        } else {
+                            next(err)
+                        }
+                    })
+                    .pipe(res)
+                } else {
+                    res.status(400).send({
+                        error: "No roster exists with the given id"
+                    })
+                }
         }
     }
 })
