@@ -99,7 +99,7 @@ router.get('/:id', async function (req, res, next) {
             res.status(200).send(course)
         }
         else {
-            next()
+            res.status(404).send({ error: "Specified course id not found" })
         }
     }
     catch(e) {

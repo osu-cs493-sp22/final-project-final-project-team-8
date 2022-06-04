@@ -82,7 +82,7 @@ router.post('/login', async function (req, res) {
         }
     } else {
         res.status(400).send({
-            error: "Request body requires an email and password"
+            error: "The request body was either not present or did not contain all of the required fields."
         })
     }
 })
