@@ -37,6 +37,7 @@ router.post('/', async function (req, res) {
                         res.status(201).send({ id: user.id })
                     }
                     catch(e) {
+                        console.log("send ino")
                         res.status(400).send({ error: "The request body was either not present or did not contain a valid User object." })
                     }
                 }
