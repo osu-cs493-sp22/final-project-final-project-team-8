@@ -6,6 +6,8 @@ const sequelize = require('./lib/sequelize')
 const { connectToDb } = require('./lib/mongo')
 const { connectToRabbitMQ, getChannel } = require('./lib/rabbitmq')
 
+//const { requireAuthentication, requireTeacherOrAdminAuth } = require('../lib/auth')
+
 const app = express()
 const port = process.env.PORT || 8000
 const queue = 'rosters'
@@ -19,44 +21,89 @@ const redisPort = process.env.REDIS_PORT || 6379
 const redisClient = redis.createClient(redisHost, redisPort)
 
 const rateLimitMaxRequests = 10
+const rateLimitMaxAuthRequests = 30
 const rateLimitWindowMs = 60000
+
 
 async function rateLimit(req, res, next) {
   const ip = req.ip
   // const tokenBucket = await getUserTokenBucket(ip)
 
-  let tokenBucket
-  try {
-    tokenBucket = await redisClient.hGetAll('123.45.67.89')
-  } catch (e) {
-    next()
-    return
-  }
-  console.log("== tokenBucket:", tokenBucket)
-  tokenBucket = {
-    tokens: parseFloat(tokenBucket.tokens) || rateLimitMaxRequests,
-    last: parseInt(tokenBucket.last) || Date.now()
-  }
-  console.log("== tokenBucket:", tokenBucket)
+  if (req.body.role == "admin" || req.body.role == "instructor") {
 
-  const now = Date.now()
-  const ellapsedMs = now - tokenBucket.last
-  tokenBucket.tokens += ellapsedMs * (rateLimitMaxRequests / rateLimitWindowMs)
-  tokenBucket.tokens = Math.min(rateLimitMaxRequests, tokenBucket.tokens)
-  tokenBucket.last = now
+  
 
-  if (tokenBucket.tokens >= 1) {
-    tokenBucket.tokens -= 1
-    await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
-    // await redisClient.hSet(ip)
-    next()
+    let tokenBucket
+    try {
+      tokenBucket = await redisClient.hGetAll('123.45.67.89')
+    } catch (e) {
+      next()
+      return
+    }
+    console.log("== tokenBucket:", tokenBucket)
+    tokenBucket = {
+      tokens: parseFloat(tokenBucket.tokens) || rateLimitMaxRequests,
+      last: parseInt(tokenBucket.last) || Date.now()
+    }
+    console.log("== tokenBucket:", tokenBucket)
+
+    const now = Date.now()
+    const ellapsedMs = now - tokenBucket.last
+    tokenBucket.tokens += ellapsedMs * (rateLimitMaxRequests / rateLimitWindowMs)
+    tokenBucket.tokens = Math.min(rateLimitMaxRequests, tokenBucket.tokens)
+    tokenBucket.last = now
+
+    if (tokenBucket.tokens >= 1) {
+      tokenBucket.tokens -= 1
+      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
+      // await redisClient.hSet(ip)
+      next()
+    } else {
+      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
+      // await redisClient.hSet(ip)
+      res.status(429).send({
+        err: "Too many requests per minute"
+      })
+    }
+
   } else {
-    await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
-    // await redisClient.hSet(ip)
-    res.status(429).send({
-      err: "Too many requests per minute"
-    })
+
+    let tokenBucket
+    try {
+      tokenBucket = await redisClient.hGetAll('123.45.67.89')
+    } catch (e) {
+      next()
+      return
+    }
+    console.log("== tokenBucket:", tokenBucket)
+    tokenBucket = {
+      tokens: parseFloat(tokenBucket.tokens) || rateLimitMaxAuthRequest,
+      last: parseInt(tokenBucket.last) || Date.now()
+    }
+    console.log("== tokenBucket:", tokenBucket)
+
+    const now = Date.now()
+    const ellapsedMs = now - tokenBucket.last
+    tokenBucket.tokens += ellapsedMs * (rateLimitMaxAuthRequest / rateLimitWindowMs)
+    tokenBucket.tokens = Math.min(rateLimitMaxAuthRequest, tokenBucket.tokens)
+    tokenBucket.last = now
+
+    if (tokenBucket.tokens >= 1) {
+      tokenBucket.tokens -= 1
+      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
+      // await redisClient.hSet(ip)
+      next()
+    } else {
+      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
+      // await redisClient.hSet(ip)
+      res.status(429).send({
+        err: "Too many requests per minute"
+      })
+    }
+
   }
+
+
 }
 
 
