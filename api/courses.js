@@ -5,6 +5,7 @@ const { ObjectId, GridFSBucket } = require('mongodb')
 const { connectToRabbitMQ, getChannel } = require('../lib/rabbitmq')
 const amqp = require('amqplib')
 const queue = 'rosters'
+const { rateLimit } = require('../server')
 
 const { ValidationError } = require('sequelize')
 

@@ -34,6 +34,11 @@ services:
     restart: on-failure
     command: npm run initdb
 
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
   api:
     build: .
     ports:
@@ -49,10 +54,12 @@ services:
       MONGO_DB_NAME: ${MONGO_DB_NAME}
       MONGO_AUTH_DB_NAME: admin
       RABBITMQ_HOST: rabbit-mq
+      REDIS_HOST: redis
     depends_on:
       - db
       - mongo
       - db-init
+      - redis
     restart: on-failure
 
   rabbit-mq:

@@ -3,6 +3,8 @@ const redis = require('redis')
 
 const api = require('./api')
 const sequelize = require('./lib/sequelize')
+const jwt = require('jsonwebtoken');
+const secret = 'SuperSecret';
 const { connectToDb } = require('./lib/mongo')
 const { connectToRabbitMQ, getChannel } = require('./lib/rabbitmq')
 
@@ -27,16 +29,53 @@ const rateLimitWindowMs = 60000
 
 async function rateLimit(req, res, next) {
   const ip = req.ip
-  // const tokenBucket = await getUserTokenBucket(ip)
-
-  if (req.body.role == "admin" || req.body.role == "instructor") {
-
-  
-
+  const authHeader = req.get('authorization') || ''
+  const authHeaderParts = authHeader.split(' ');
+  const token = authHeaderParts[0] == 'Bearer' ? authHeaderParts[1] : null
+  try {
+    const payload = jwt.verify(token, secret)
+    req.user = payload.sub
     let tokenBucket
     try {
-      tokenBucket = await redisClient.hGetAll('123.45.67.89')
+      tokenBucket = await redisClient.hGetAll(ip)
+      console.log("tokenBucket: ", tokenBucket)
     } catch (e) {
+      console.log(e)
+      next()
+      return
+    }
+    console.log("== tokenBucket:", tokenBucket)
+    tokenBucket = {
+      tokens: parseFloat(tokenBucket.tokens) || rateLimitMaxAuthRequests,
+      last: parseInt(tokenBucket.last) || Date.now()
+    }
+    console.log("== tokenBucket:", tokenBucket)
+
+    const now = Date.now()
+    const ellapsedMs = now - tokenBucket.last
+    tokenBucket.tokens += ellapsedMs * (rateLimitMaxAuthRequests / rateLimitWindowMs)
+    tokenBucket.tokens = Math.min(rateLimitMaxAuthRequests, tokenBucket.tokens)
+    tokenBucket.last = now
+
+    if (tokenBucket.tokens >= 1) {
+      tokenBucket.tokens -= 1
+      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
+      // await redisClient.hSet(ip)
+      next()
+    } else {
+      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
+      // await redisClient.hSet(ip)
+      res.status(429).send({
+        err: "Too many requests per minute"
+      })
+    }
+  } catch (err) {
+    let tokenBucket
+    try {
+      tokenBucket = await redisClient.hGetAll(ip)
+      console.log("tokenBucket: ", tokenBucket)
+    } catch (e) {
+      console.log(e)
       next()
       return
     }
@@ -65,44 +104,7 @@ async function rateLimit(req, res, next) {
         err: "Too many requests per minute"
       })
     }
-
-  } else {
-
-    let tokenBucket
-    try {
-      tokenBucket = await redisClient.hGetAll('123.45.67.89')
-    } catch (e) {
-      next()
-      return
-    }
-    console.log("== tokenBucket:", tokenBucket)
-    tokenBucket = {
-      tokens: parseFloat(tokenBucket.tokens) || rateLimitMaxAuthRequest,
-      last: parseInt(tokenBucket.last) || Date.now()
-    }
-    console.log("== tokenBucket:", tokenBucket)
-
-    const now = Date.now()
-    const ellapsedMs = now - tokenBucket.last
-    tokenBucket.tokens += ellapsedMs * (rateLimitMaxAuthRequest / rateLimitWindowMs)
-    tokenBucket.tokens = Math.min(rateLimitMaxAuthRequest, tokenBucket.tokens)
-    tokenBucket.last = now
-
-    if (tokenBucket.tokens >= 1) {
-      tokenBucket.tokens -= 1
-      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
-      // await redisClient.hSet(ip)
-      next()
-    } else {
-      await redisClient.hSet(ip, [['tokens', tokenBucket.tokens], ['last', tokenBucket.last]])
-      // await redisClient.hSet(ip)
-      res.status(429).send({
-        err: "Too many requests per minute"
-      })
-    }
-
   }
-
 
 }
 
