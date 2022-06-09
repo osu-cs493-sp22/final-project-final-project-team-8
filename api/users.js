@@ -33,7 +33,7 @@ router.post('/', async function (req, res) {
                 }
                 else {
                     try {
-                        const user = await User.create(userToInsert, UserClientFields)
+                        const user = await User.create(req.body, UserClientFields)
                         res.status(201).send({ id: user.id })
                     }
                     catch(e) {
@@ -111,9 +111,13 @@ router.get('/:id', requireAuthentication, async function (req, res) {
             })
         }
         res.status(200).send({ user: user })
+    } else if (authenticatedUser) {
+        res.status(403).send({
+            err: "Authentication criteria not satisfied"
+        })
     } else {
-        res.status(401).send({
-            err: "Invalid credentials"
+        res.status(404).send({
+            err: "User id does not exist"
         })
     }
 })

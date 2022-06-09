@@ -17,7 +17,7 @@ const { getDbReference } = require('../lib/mongo')
 router.get('/', async function (req, res) {
     let page = parseInt(req.query.page) || 1
     page = page < 1 ? 1 : page
-    const numPerPage = 10
+    const numPerPage = 2
     const offset = (page - 1) * numPerPage
     
     var where = {}
@@ -64,8 +64,8 @@ router.post('/', requireAuthentication, async function (req, res, next) {
     if (user.role == "admin") {
         if (req.body.instructorId) {
             try {
-                const user = await User.findOne({ where: { id: req.body.instructorId }})
-                if (user && user.role == "instructor") {
+                const instructor = await User.findOne({ where: { id: req.body.instructorId }})
+                if (instructor && instructor.role == "instructor") {
                     const course = await Course.create(req.body, CourseClientFields)
                     res.status(201).send({ id: course.id })
                 }
@@ -88,7 +88,7 @@ router.post('/', requireAuthentication, async function (req, res, next) {
         }
     }
     else {
-        res.send(403).send({ error: "Only an authenticated User with 'admin' role can create a new Course" })
+        res.status(403).send({ error: "Only an authenticated User with 'admin' role can create a new Course" })
     }
 })
 
@@ -177,10 +177,10 @@ router.get('/:id/students', requireAuthentication, async function (req, res) {
             }
         ]
     })
-    const students = course.users
     if (!course)
         res.status(404).send({error: "Specified Course `id` not found"})
     else {
+        const students = course.users
         const auth = await requireTeacherOrAdminAuth(req.user, course)
         switch (auth) {
             case 403:
